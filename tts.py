@@ -167,20 +167,15 @@ class StyleTTS2:
 
         return ipa_clean
 
-    def phonemize_line(self, line):
-        parts = line.strip().split('|')
-        if len(parts) != 3:
-            return None
-        wav, text, speaker_id = parts
-        
-        chunks = re.split(r'([^\w\s]+)', text)
+    def phonemize_line(self, text):
+        chunks = re.split(r'([^\w\s\']+)', text)
 
         phonemized_chunks = []
         for chunk in chunks:
-            if re.match(r'^\w', chunk.strip()):
+            if re.match(r'([\w\s\']+)', chunk.strip()):
                 phonemized_chunk = self.phonemize_with_espeak(chunk.strip())
                 phonemized_chunks.append(phonemized_chunk)
-            else:
+            elif len(chunk.strip()) > 0:
                 phonemized_chunks.append(chunk.strip())
 
         phonemes = ' '.join(phonemized_chunks)
