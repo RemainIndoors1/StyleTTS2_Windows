@@ -1,1 +1,6 @@
 __pycache__
+/.vs
+/Lib/site-packages
+/Scripts
+/share/man/man1
+/pyvenv.cfg
