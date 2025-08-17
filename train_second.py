@@ -143,7 +143,7 @@ def main(config_path):
         if config.get('first_stage_path', '') != '':
             first_stage_path = osp.join(log_dir, config.get('first_stage_path', 'first_stage.pth'))
             print('Loading the first stage model at %s ...' % first_stage_path)
-            model, _, start_epoch, iters = load_checkpoint(model, 
+            model, _, start_epoch, iters = load_checkpoint2(model,
                 None, 
                 first_stage_path,
                 load_only_params=True,
@@ -209,7 +209,7 @@ def main(config_path):
         
     # load models if there is a model
     if load_pretrained:
-        model, optimizer, start_epoch, iters = load_checkpoint(model,  optimizer, config['pretrained_model'],
+        model, optimizer, start_epoch, iters = load_checkpoint2(model,  optimizer, config['pretrained_model'],
                                     load_only_params=config.get('load_only_params', True))
         
     n_down = model.text_aligner.n_down
@@ -767,10 +767,10 @@ def main(config_path):
                     if bib >= 5:
                         break
                             
-        if epoch % saving_epoch == 0:
+        if (epoch + 1) % saving_epoch == 0 or (epoch + 1) == epochs:
             if (loss_test / iters_test) < best_loss:
                 best_loss = loss_test / iters_test
-            print('Saving..')
+            print('Saving...')
             state = {
                 'net':  {key: model[key].state_dict() for key in model}, 
                 'optimizer': optimizer.state_dict(),
@@ -778,7 +778,7 @@ def main(config_path):
                 'val_loss': loss_test / iters_test,
                 'epoch': epoch,
             }
-            save_path = osp.join(log_dir, 'epoch_2nd_%05d.pth' % epoch)
+            save_path = osp.join(log_dir, 'epoch_2nd_%05d.pth' % (epoch + 1))
             torch.save(state, save_path)
             
             # if estimate sigma, save the estimated simga

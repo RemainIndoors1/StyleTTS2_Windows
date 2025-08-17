@@ -15,12 +15,24 @@ for i in range(len((symbols))):
 class TextCleaner:
     def __init__(self, dummy=None):
         self.word_index_dictionary = dicts
-        print(len(dicts))
+
     def __call__(self, text):
         indexes = []
+        
+        text = self.__preclean__(text)
+
         for char in text:
             try:
                 indexes.append(self.word_index_dictionary[char])
             except KeyError:
-                print(text)
+                print(f"Error appending character {char} in text: {text}")
         return indexes
+
+    def __preclean__(self, text):
+        # Remove or replace unhandled punctuation to avoid errors in training.
+        text = text.replace('-', '—')
+        text = text.replace('*', '')
+        text = text.replace('’', '')
+        text = text.replace('​', '') # zero-width space whitespace character
+        text = text.replace('%', 'pɚˈsɛnt') # this could (should?) be handled before phonemization
+        return text
