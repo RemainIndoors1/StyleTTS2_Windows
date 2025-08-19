@@ -1,3 +1,7 @@
+# Remain's notes
+
+This is still a work in progress, but I've learned several things about Training StyleTTS2 since I created my [StyleTTS2_Windows_Docs](https://github.com/RemainIndoors1/StyleTTS2_Windows_Docs) repository. I'm not sure if anybody else has figured this out already, but I found a potential fix for drastically lowering GPU memory usage during training. I'm working on training a model from scratch now, so I need to verify it works as expected before sharing, but I will update one or both of these repositories after I've verified these changes work.
+
 # StyleTTS 2: Towards Human-Level Text-to-Speech through Style Diffusion and Adversarial Training with Large Speech Language Models
 
 ### Yinghao Aaron Li, Cong Han, Vinay S. Raghavan, Gavin Mischler, Nima Mesgarani
