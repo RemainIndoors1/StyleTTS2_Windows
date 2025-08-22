@@ -4,9 +4,9 @@ save_freq: 5
 log_interval: 10
 device: "cuda"
 epochs_1st: 200 # number of epochs for first stage training (pre-training)
-epochs_2nd: 100 # number of epochs for second stage training (joint training)
+epochs_2nd: 200 # number of epochs for second stage training (joint training)
 batch_size: 16
-max_len: 400 # maximum number of frames
+max_len: 750 # maximum number of frames. 800 = 10 seconds max. ({maxLengthInSeconds} / 0.0125) this should be high enough to cover max length wav file.
 pretrained_model: ""
 second_stage_load_pretrained: true # set to true if the pre-trained model is for 2nd stage
 load_only_params: false # set to true if do not want to load epoch numbers and optimizer parameters

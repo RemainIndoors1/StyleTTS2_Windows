@@ -1,4 +1,4 @@
-import os
+﻿import os
 import random
 import subprocess
 import unicodedata
@@ -6,7 +6,6 @@ import re
 
 # Input and output file paths
 input_file = 'Path/to/metadata.csv'
-
 
 def phonemize_with_espeak(text):
     result = subprocess.run(
@@ -29,13 +28,27 @@ def phonemize_with_espeak(text):
 
     return ipa_clean
 
-
 def phonemize_line(line):
     parts = line.strip().split('|')
     if len(parts) != 3:
         return None
     wav, text, speaker_id = parts
+    
+    # replacing asterisks with em dash to cover pause after footnote in asterisks
+    # example: "*smiles brightly* I'm very happy to see you" should become "smiles brightly— I'm very happy to see you"
+    text = text.replace('* ', '— ')
+    text = text.replace(' *', ' ')
+    text = re.sub(r'^[\*]', '', text.strip)
+    text = re.sub(r'[\*]$', '', text)
 
+    text = text.replace('"', '')
+    text = text.replace('’', "'") # replace invalid utf-8 apostrophe
+    text = text.replace('​', '') # zero-width space whitespace character
+    text = text.replace('&', ' and ') # convert ampersand to and for pronunciation
+    text = text.replace("%", " percent") # convert percent to spoken word
+    text = text.replace("  ", " ") # get rid of double spaces
+    text = text.replace("...", "…") # convert three periods to ellipsis
+    
     chunks = re.split(r'([^\w\s\']+)', text)
 
     phonemized_chunks = []
@@ -50,18 +63,17 @@ def phonemize_line(line):
 
     return f"{wav}|{phonemes.strip()}|{speaker_id}"
 
-
 with open(input_file, 'r', encoding='utf-8') as f:
-    lines = [line.strip() for line in f if "|" in line]
-    split_idx = int(len(lines) * 0.9)
-    random.shuffle(lines)
+   lines = [line.strip() for line in f if "|" in line]
+   split_idx = int(len(lines) * 0.9)
+   random.shuffle(lines)
 
 with open("Data/train_list.txt", "w", encoding="utf-8") as f:
-    for line in lines[:split_idx]:
-        phonemized = phonemize_line(line)
-        f.write(f"{phonemized}\n")
+   for line in lines[:split_idx]:
+       phonemized = phonemize_line(line)
+       f.write(f"{phonemized}\n")
 
 with open("Data/val_list.txt", "w", encoding="utf-8") as f:
-    for line in lines[split_idx:]:
-        phonemized = phonemize_line(line)
-        f.write(f"{phonemized}\n")
+   for line in lines[split_idx:]:
+       phonemized = phonemize_line(line)
+       f.write(f"{phonemized}\n")

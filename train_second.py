@@ -13,6 +13,7 @@ import click
 import shutil
 import traceback
 import warnings
+import gc
 warnings.simplefilter('ignore')
 from torch.utils.tensorboard import SummaryWriter
 
@@ -561,6 +562,9 @@ def main(config_path):
                 
                 print('Time elasped:', time.time()-start_time)
                 
+            gc.collect()
+            torch.cuda.empty_cache()
+
         loss_test = 0
         loss_align = 0
         loss_f = 0
@@ -675,6 +679,9 @@ def main(config_path):
                     traceback.print_exc()
                     continue
 
+                gc.collect()
+                torch.cuda.empty_cache()
+
         print('Epochs:', epoch + 1)
         logger.info('Validation loss: %.3f, Dur loss: %.3f, F0 loss: %.3f' % (loss_test / iters_test, loss_align / iters_test, loss_f / iters_test) + '\n\n\n')
         print('\n\n\n')
@@ -788,5 +795,8 @@ def main(config_path):
                 with open(osp.join(log_dir, osp.basename(config_path)), 'w') as outfile:
                     yaml.dump(config, outfile, default_flow_style=True)
         
+        gc.collect()
+        torch.cuda.empty_cache()
+
 if __name__=="__main__":
     main()

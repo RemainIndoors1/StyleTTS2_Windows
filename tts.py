@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import librosa
 import scipy
 import torch
@@ -168,6 +168,21 @@ class StyleTTS2:
         return ipa_clean
 
     def phonemize_line(self, text):
+        # replacing asterisks with em dash to cover pause after footnote in asterisks
+        # example: "*smiles brightly* I'm very happy to see you" should become "smiles brightly— I'm very happy to see you"
+        text = text.replace('* ', '— ')
+        text = text.replace(' *', ' ')
+        text = re.sub(r'^[\*]', '', text.strip)
+        text = re.sub(r'[\*]$', '', text)
+
+        text = text.replace('"', '')
+        text = text.replace('’', "'") # replace invalid utf-8 apostrophe
+        text = text.replace('​', '') # zero-width space whitespace character
+        text = text.replace('&', ' and ') # convert ampersand to and for pronunciation
+        text = text.replace("%", " percent") # convert percent to spoken word
+        text = text.replace("  ", " ") # get rid of double spaces
+        text = text.replace("...", "…") # convert three periods to ellipsis
+
         chunks = re.split(r'([^\w\s\']+)', text)
 
         phonemized_chunks = []
@@ -211,7 +226,7 @@ class StyleTTS2:
             ref_s = self.compute_style(target_voice_path)  # target style vector
 
         text = text.strip()
-        text = text.replace('"', '')
+        
         phoneme_string = self.phonemize_line(text)
 
         textcleaner = TextCleaner()
