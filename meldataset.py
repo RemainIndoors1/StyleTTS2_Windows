@@ -51,9 +51,8 @@ class TextCleaner:
         # Remove or replace unhandled punctuation to avoid errors in training.
         text = text.replace('-', '—')
         text = text.replace('*', '')
-        text = text.replace('’', '')
+        text = text.replace('’', "'")
         text = text.replace('​', '') # zero-width space whitespace character
-        text = text.replace('%', 'pɚˈsɛnt') # this could (should?) be handled before phonemization
         return text
 
 np.random.seed(1)

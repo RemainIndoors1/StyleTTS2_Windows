@@ -1,5 +1,6 @@
 import os
 import os.path as osp
+import gc
 import re
 import sys
 import yaml
@@ -321,7 +322,9 @@ def main(config_path):
                 running_loss = 0
                 
                 print('Time elasped:', time.time()-start_time)
-                                
+                
+            gc.collect()
+            torch.cuda.empty_cache()
         loss_test = 0
 
         _ = [model[key].eval() for key in model]
@@ -426,7 +429,10 @@ def main(config_path):
                 }
                 save_path = osp.join(log_dir, 'epoch_1st_%05d.pth' % epoch)
                 torch.save(state, save_path)
-                                
+                               
+        gc.collect()
+        torch.cuda.empty_cache()
+
     if accelerator.is_main_process:
         print('Saving..')
         state = {
