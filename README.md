@@ -1,6 +1,14 @@
 # Remain's notes
 
-This is still a work in progress, but I've learned several things about Training StyleTTS2 since I created my [StyleTTS2_Windows_Docs](https://github.com/RemainIndoors1/StyleTTS2_Windows_Docs) repository. I'm not sure if anybody else has figured this out already, but I found a potential fix for drastically lowering GPU memory usage during training. I'm working on training a model from scratch now, so I need to verify it works as expected before sharing, but I will update one or both of these repositories after I've verified these changes work.
+There's an issue with the original train_first.py and train_second.py when you try to run training on a single GPU. I imagine this isn't as much of a problem if you're using accelerate and running on multiple GPUs, but on a single GPU, it doesn't clean up after itself in between epochs or between batches within epochs. That causes excessive memory usage, because it leaves too much data cached in GPU memory that isn't being used. If you have unlimited GPU memory, this is great because it will keep your audio data and texts cached, which means faster and less expensive training. However... If you're trying to run training on a single GPU, you're going to run out of memory too fast.
+
+I changed `train_first.py` and `train_second.py` to run garbage collection and clear torch cache at the [end of each batch](https://github.com/RemainIndoors1/StyleTTS2_Windows/blob/main/train_first.py#L326-L327) and at the [end of each epoch](https://github.com/RemainIndoors1/StyleTTS2_Windows/blob/main/train_first.py#L433-L434). As a result, on an NVidia 3090 with 24GB of memory, I was able to run training on up-to 9 seconds long audio files (max_len = 750) with a Batch size of 4 for `train_first.py` whereas previously I had a `max_len` of 400 (5 seconds or shorter audio clips) and it struggled to run `train_first.py` with a batch size of 2. 
+
+I believe with these optimizations if you use a max_len of 400, you could fully train a model from start to finish on a single 3090. I haven't tested, but the memory savings are considerable. 
+
+There's also a `build_dataset.py` script you can use to build your dataset to train on. You just need a metadata.csv file in the following format: `{filename.wav}|{transcription of audio}|{speakerId}`, update the path to that file, and run the script, and it should generate train_list.txt and val_list.txt for you.  This does use espeak-ng to phonemize the text. You can read more about that in this repository: [StyleTTS2_Windows_Docs](https://github.com/RemainIndoors1/StyleTTS2_Windows_Docs)
+
+There's also a sample `inference.py` and `tts.py` script you can use to test inference after you've finished training. You should just have to update the settings at the top in `inference.py` and run that script to generate speech.
 
 # StyleTTS 2: Towards Human-Level Text-to-Speech through Style Diffusion and Adversarial Training with Large Speech Language Models
 
